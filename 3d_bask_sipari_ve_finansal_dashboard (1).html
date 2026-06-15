@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Baskı Sipariş ve Finansal Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/30 text-cyan-400">
+                    <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white tracking-wide">3D Core Pro</h1>
+                    <p class="text-xs text-slate-400">Üretim & Sipariş Analitiği</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="text-slate-300 font-medium">Sistem Aktif</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- Üst Özet Kartları -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Toplam Sipariş -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 text-white pointer-events-none">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2H7a1 1 0 100-2h.01zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
+                </div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Toplam Sipariş</p>
+                <p id="kpi-orders" class="text-3xl font-bold text-white mt-2">0</p>
+                <div class="mt-2 text-xs text-slate-500">Kayıtlı aktif sipariş adedi</div>
+            </div>
+
+            <!-- Toplam Ciro -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 text-emerald-400 pointer-events-none">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M8.433 7.418c.554-.589 1.448-.589 2.002 0l.207.22 1.355-.937-.21-.22a3.417 3.417 0 00-4.885 0l-.183.194.273.918.442-.175z"></path><path fill-rule="evenodd" d="M5 3.5A1.5 1.5 0 016.5 2h7A1.5 1.5 0 0115 3.5v13a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 015 16.5v-13zm1.5.5a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h7a.5.5 0 00.5-.5v-13a.5.5 0 00-.5-.5h-7z" clip-rule="evenodd"></path></svg>
+                </div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Toplam Ciro</p>
+                <p id="kpi-revenue" class="text-3xl font-bold text-emerald-400 mt-2">0,00 ₺</p>
+                <div class="mt-2 text-xs text-slate-500">Gerçekleşen toplam satış</div>
+            </div>
+
+            <!-- Toplam Maliyet -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 text-rose-400 pointer-events-none">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                </div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Toplam Maliyet</p>
+                <p id="kpi-cost" class="text-3xl font-bold text-rose-400 mt-2">0,00 ₺</p>
+                <div class="mt-2 text-xs text-slate-500">Tüm üretim giderleri ve amortisman</div>
+            </div>
+
+            <!-- Net Kâr -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group">
+                <div class="absolute right-0 bottom-0 translate-x-3 translate-y-3 opacity-5 text-cyan-400 pointer-events-none">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path></svg>
+                </div>
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Net Kâr</p>
+                <p id="kpi-profit" class="text-3xl font-bold text-cyan-400 mt-2">0,00 ₺</p>
+                <div class="mt-2 text-xs text-slate-500">Temiz kâr ve kazanç oranı</div>
+            </div>
+        </div>
+
+        <!-- Bildirim Paneli (Toast Alternatifi) -->
+        <div id="toast-container" class="hidden mb-6 p-4 rounded-xl border flex items-center justify-between transition-all duration-300">
+            <div class="flex items-center space-x-3">
+                <div id="toast-icon-wrapper" class="p-1.5 rounded-lg">
+                    <!-- Dinamik İkon -->
+                </div>
+                <span id="toast-message" class="text-sm font-medium"></span>
+            </div>
+            <button onclick="hideToast()" class="text-slate-400 hover:text-white transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Sol Sütun: Form -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-fit">
+                <h2 class="text-lg font-bold text-white mb-6 flex items-center space-x-2">
+                    <span class="p-1.5 bg-cyan-500/10 rounded text-cyan-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </span>
+                    <span>Sipariş Bilgileri Girişi</span>
+                </h2>
+
+                <form id="order-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="edit-index" value="-1">
+                    
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">MÜŞTERİ ADI</label>
+                        <input type="text" id="cust-name" required placeholder="Örn: Ahmet Yılmaz" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-white placeholder-slate-600 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">ÜRÜN ADI</label>
+                        <input type="text" id="prod-name" required placeholder="Örn: Dişli Çark 50mm" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-white placeholder-slate-600 transition">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">BASKI SÜRESİ (SAAT)</label>
+                            <input type="number" step="0.1" id="print-hours" required min="0.1" placeholder="8.5" oninput="calculateLiveMaliyet()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-white placeholder-slate-600 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">GRAMAJ (GR)</label>
+                            <input type="number" step="1" id="print-weight" required min="1" placeholder="150" oninput="calculateLiveMaliyet()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-white placeholder-slate-600 transition">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">FİLAMANT KG FİYATI (TL)</label>
+                            <input type="number" step="1" id="filament-price" required min="10" placeholder="600" oninput="calculateLiveMaliyet()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-white placeholder-slate-600 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">TESLİMAT TARİHİ</label>
+                            <input type="date" id="delivery-date" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-white transition">
+                        </div>
+                    </div>
+
+                    <!-- Canlı Maliyet Önizleme ve 2x Kural Bilgisi -->
+                    <div id="live-calc" class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Hammadde:</span>
+                            <span id="live-raw-cost" class="font-medium text-white">0,00 ₺</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Elektrik + Amortisman:</span>
+                            <span id="live-eng-cost" class="font-medium text-white">0,00 ₺</span>
+                        </div>
+                        <div class="flex justify-between border-b border-slate-800 pb-2">
+                            <span class="text-slate-400">Hata Payı (%20):</span>
+                            <span id="live-fail-cost" class="font-medium text-white">0,00 ₺</span>
+                        </div>
+                        <div class="flex justify-between pt-1 font-semibold text-sm">
+                            <span class="text-slate-300">Toplam Net Maliyet:</span>
+                            <span id="live-total-cost" class="text-cyan-400">0,00 ₺</span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-slate-800/50 font-bold text-xs text-emerald-400">
+                            <span>Önerilen Min. Satış Fiyatı (2x):</span>
+                            <span id="live-min-price">0,00 ₺</span>
+                        </div>
+                    </div>
+
+                    <!-- Satış Fiyatı Girişi -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">SATIŞ FİYATI (TL)</label>
+                        <input type="number" step="1" id="sales-price" required min="1" placeholder="0" oninput="validateSalesPrice()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:ring-1 outline-none text-white placeholder-slate-600 transition">
+                        <p id="sales-warning" class="hidden text-[11px] text-rose-500 font-medium mt-1.5 leading-snug"></p>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-semibold py-3 rounded-xl shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/20 transition-all flex items-center justify-center space-x-2 text-sm">
+                        <span id="btn-text">Siparişi Sisteme Ekle</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Sağ Sütun: Grafik ve Veriler -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Grafik Bölümü -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                        <h3 class="text-sm font-semibold text-slate-300 mb-4">Gider Dağılım Analizi</h3>
+                        <div class="relative h-48 flex items-center justify-center">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                        <h3 class="text-sm font-semibold text-slate-300 mb-4">Sipariş Bazında ROI Kârlılık (%)</h3>
+                        <div class="relative h-48 flex items-center justify-center">
+                            <canvas id="roiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sipariş Tablosu -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-white text-base">Üretim Sipariş Listesi</h3>
+                            <p class="text-xs text-slate-400">Kayıtlı tüm 3D baskı siparişlerinin analizi</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="exportCSV()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium px-4 py-2 rounded-lg border border-slate-700 transition flex items-center space-x-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                <span>Excel/CSV İndir</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950 border-b border-slate-800 text-[11px] font-bold text-slate-400 tracking-wider">
+                                    <th class="py-3 px-4">MÜŞTERİ / ÜRÜN</th>
+                                    <th class="py-3 px-4 text-center">BASKI / GRAMAJ</th>
+                                    <th class="py-3 px-4 text-right">TOPLAM MALİYET</th>
+                                    <th class="py-3 px-4 text-right">SATIŞ FİYATI</th>
+                                    <th class="py-3 px-4 text-right">NET KÂR (ROI)</th>
+                                    <th class="py-3 px-4 text-center">EYLEM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-tbody" class="divide-y divide-slate-800/50 text-xs">
+                                <!-- Dinamik Sipariş Satırları -->
+                            </tbody>
+                        </table>
+                        <div id="no-data" class="hidden py-12 text-center text-slate-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
+                            Kayıtlı sipariş bulunmuyor. Yeni bir tane ekleyerek başlayın.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-6 border-t border-slate-900 bg-slate-950/60 text-center text-xs text-slate-500">
+        <p>© 2026 3D Core Pro. Tüm hakları saklıdır. Bu uygulama yerel veritabanında çalışmaktadır.</p>
+    </footer>
+
+    <script>
+        // Kriter Değişkenleri
+        const MAKINE_BEDELI = 30000;
+        const MAKINE_OMRU_SAAT = 10000;
+        const AMORTISMAN_SAAT_TL = MAKINE_BEDELI / MAKINE_OMRU_SAAT; // Saat başı 3 TL
+        const ELEKTRIK_SAAT_TL = 15; // Saat başı 15 TL
+        const HATA_PAYI_ORANI = 0.20; // %20 Hata payı
+
+        let orders = [];
+        let costChart = null;
+        let roiChart = null;
+
+        // Sayfa Yüklendiğinde
+        window.onload = function() {
+            // LocalStorage'dan verileri çek
+            const savedOrders = localStorage.getItem('3d_orders');
+            if (savedOrders) {
+                orders = JSON.parse(savedOrders);
+            }
+            updateUI();
+        };
+
+        // Form Girdilerinden Anlık Maliyet ve Min. Satış Fiyatı Hesaplama
+        function calculateLiveMaliyet() {
+            const printHours = parseFloat(document.getElementById('print-hours').value) || 0;
+            const printWeight = parseFloat(document.getElementById('print-weight').value) || 0;
+            const filamentPrice = parseFloat(document.getElementById('filament-price').value) || 0;
+
+            const rawCost = (printWeight * (filamentPrice / 1000));
+            const engCost = (printHours * ELEKTRIK_SAAT_TL) + (printHours * AMORTISMAN_SAAT_TL);
+            const failCost = (rawCost + (printHours * ELEKTRIK_SAAT_TL)) * HATA_PAYI_ORANI;
+            const totalCost = rawCost + engCost + failCost;
+            const minSalesPrice = totalCost * 2;
+
+            // Önizleme alanını güncelle
+            document.getElementById('live-raw-cost').innerText = rawCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            document.getElementById('live-eng-cost').innerText = engCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            document.getElementById('live-fail-cost').innerText = failCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            document.getElementById('live-total-cost').innerText = totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            document.getElementById('live-min-price').innerText = minSalesPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+
+            // Satış fiyatı girildiyse uyarıyı anlık güncelle
+            validateSalesPrice();
+            return totalCost;
+        }
+
+        // Satış Fiyatı 2x Maliyet Sınırını Denetleme
+        function validateSalesPrice() {
+            const totalCost = calculateLiveMaliyet();
+            const salesPriceInput = document.getElementById('sales-price');
+            const salesPrice = parseFloat(salesPriceInput.value) || 0;
+            const minRequiredPrice = totalCost * 2;
+            const warningEl = document.getElementById('sales-warning');
+
+            if (salesPriceInput.value === '') {
+                warningEl.classList.add('hidden');
+                salesPriceInput.className = "w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none text-white placeholder-slate-600 transition";
+                return true;
+            }
+
+            if (salesPrice < minRequiredPrice) {
+                warningEl.innerHTML = `🚫 <strong>Fiyat Yetersiz!</strong> Satış fiyatı, toplam maliyetin en az 2 katı olmalıdır.<br>Gerekli Min. Fiyat: <strong>${minRequiredPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺</strong>`;
+                warningEl.classList.remove('hidden');
+                
+                // Input stilini hata moduna al
+                salesPriceInput.className = "w-full bg-slate-950 border border-rose-500/80 rounded-xl px-4 py-2.5 text-sm focus:ring-1 focus:ring-rose-500 outline-none text-white placeholder-slate-600 transition";
+                return false;
+            } else {
+                warningEl.classList.add('hidden');
+                salesPriceInput.className = "w-full bg-slate-950 border border-emerald-500/80 rounded-xl px-4 py-2.5 text-sm focus:ring-1 focus:ring-emerald-500 outline-none text-white placeholder-slate-600 transition";
+                return true;
+            }
+        }
+
+        // Sipariş Ekleme / Düzenleme
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const isPriceValid = validateSalesPrice();
+            if (!isPriceValid) {
+                showToast("Satış fiyatı, toplam maliyetin 2 katından az olamaz! Lütfen fiyatı güncelleyin.", "error");
+                document.getElementById('sales-price').focus();
+                return;
+            }
+
+            const editIndex = parseInt(document.getElementById('edit-index').value);
+            const custName = document.getElementById('cust-name').value;
+            const prodName = document.getElementById('prod-name').value;
+            const printHours = parseFloat(document.getElementById('print-hours').value);
+            const printWeight = parseFloat(document.getElementById('print-weight').value);
+            const filamentPrice = parseFloat(document.getElementById('filament-price').value);
+            const deliveryDate = document.getElementById('delivery-date').value;
+            const salesPrice = parseFloat(document.getElementById('sales-price').value);
+
+            // Detaylı Hesaplamalar
+            const filamentCost = (printWeight * (filamentPrice / 1000));
+            const electricCost = printHours * ELEKTRIK_SAAT_TL;
+            const amortisationCost = printHours * AMORTISMAN_SAAT_TL;
+            const failureCost = (filamentCost + electricCost) * HATA_PAYI_ORANI;
+            const totalCost = filamentCost + electricCost + amortisationCost + failureCost;
+            const netProfit = salesPrice - totalCost;
+            const roi = (netProfit / totalCost) * 100;
+
+            const orderData = {
+                custName,
+                prodName,
+                printHours,
+                printWeight,
+                filamentPrice,
+                deliveryDate,
+                salesPrice,
+                breakdown: {
+                    filamentCost,
+                    electricCost,
+                    amortisationCost,
+                    failureCost
+                },
+                totalCost,
+                netProfit,
+                roi
+            };
+
+            if (editIndex === -1) {
+                // Yeni Sipariş
+                orders.push(orderData);
+                showToast("Yeni sipariş başarıyla eklendi!", "success");
+            } else {
+                // Düzenleme
+                orders[editIndex] = orderData;
+                document.getElementById('edit-index').value = "-1";
+                document.getElementById('submit-btn').innerHTML = `<span>Siparişi Sisteme Ekle</span>`;
+                showToast("Sipariş başarıyla güncellendi!", "success");
+            }
+
+            // Temizleme ve Kayıt
+            document.getElementById('order-form').reset();
+            localStorage.setItem('3d_orders', JSON.stringify(orders));
+            updateUI();
+        }
+
+        // Sipariş Silme
+        function deleteOrder(index) {
+            orders.splice(index, 1);
+            localStorage.setItem('3d_orders', JSON.stringify(orders));
+            showToast("Sipariş listeden kaldırıldı.", "warning");
+            updateUI();
+        }
+
+        // Sipariş Düzenleme Moduna Alma
+        function editOrder(index) {
+            const order = orders[index];
+            document.getElementById('edit-index').value = index;
+            document.getElementById('cust-name').value = order.custName;
+            document.getElementById('prod-name').value = order.prodName;
+            document.getElementById('print-hours').value = order.printHours;
+            document.getElementById('print-weight').value = order.printWeight;
+            document.getElementById('filament-price').value = order.filamentPrice;
+            document.getElementById('delivery-date').value = order.deliveryDate;
+            document.getElementById('sales-price').value = order.salesPrice;
+
+            document.getElementById('submit-btn').innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17.5"></path></svg>
+                <span>Siparişi Güncelle</span>
+            `;
+
+            document.getElementById('order-form').scrollIntoView({ behavior: 'smooth' });
+            calculateLiveMaliyet();
+        }
+
+        // Genel UI Güncelleme (KPI, Tablo ve Grafikler)
+        function updateUI() {
+            renderTable();
+            renderKPI();
+            renderCharts();
+            calculateLiveMaliyet();
+        }
+
+        // KPI Kartlarını Hesapla ve Yazdır
+        function renderKPI() {
+            let totalRevenue = 0;
+            let totalCost = 0;
+            let totalProfit = 0;
+
+            orders.forEach(o => {
+                totalRevenue += o.salesPrice;
+                totalCost += o.totalCost;
+                totalProfit += o.netProfit;
+            });
+
+            document.getElementById('kpi-orders').innerText = orders.length;
+            document.getElementById('kpi-revenue').innerText = totalRevenue.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            document.getElementById('kpi-cost').innerText = totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+            document.getElementById('kpi-profit').innerText = totalProfit.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+        }
+
+        // Sipariş Listesini Tabloya Yazdır
+        function renderTable() {
+            const tbody = document.getElementById('orders-tbody');
+            const noData = document.getElementById('no-data');
+
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                noData.classList.remove('hidden');
+                return;
+            } else {
+                noData.classList.add('hidden');
+            }
+
+            orders.forEach((o, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/40 border-b border-slate-800/40 transition";
+                tr.innerHTML = `
+                    <td class="py-4 px-4 max-w-xs">
+                        <div class="font-bold text-white truncate">${o.custName}</div>
+                        <div class="text-slate-400 text-[11px] truncate mt-0.5">${o.prodName}</div>
+                    </td>
+                    <td class="py-4 px-4 text-center">
+                        <div class="text-white">${o.printHours} s</div>
+                        <div class="text-slate-500 text-[10px] mt-0.5">${o.printWeight} gr</div>
+                    </td>
+                    <td class="py-4 px-4 text-right font-medium text-slate-300">
+                        ${o.totalCost.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                    </td>
+                    <td class="py-4 px-4 text-right font-semibold text-emerald-400">
+                        ${o.salesPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                    </td>
+                    <td class="py-4 px-4 text-right">
+                        <span class="text-cyan-400 font-bold">${o.netProfit.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺</span>
+                        <div class="text-[10px] text-cyan-500 font-semibold mt-0.5">%${o.roi.toFixed(0)} ROI</div>
+                    </td>
+                    <td class="py-4 px-4 text-center space-x-2">
+                        <button onclick="editOrder(${index})" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded transition" title="Düzenle">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                        <button onclick="deleteOrder(${index})" class="p-1.5 bg-slate-800 hover:bg-rose-950 text-rose-400 rounded transition" title="Sil">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Grafik Çizimleri
+        function renderCharts() {
+            // Veri Dağılım Toplamları
+            let totalFilament = 0;
+            let totalElectric = 0;
+            let totalAmortisation = 0;
+            let totalFailure = 0;
+
+            orders.forEach(o => {
+                totalFilament += o.breakdown.filamentCost;
+                totalElectric += o.breakdown.electricCost;
+                totalAmortisation += o.breakdown.amortisationCost;
+                totalFailure += o.breakdown.failureCost;
+            });
+
+            // Grafik 1: Gider Dağılım Donut Grafik
+            if (costChart) costChart.destroy();
+            const ctxCost = document.getElementById('costChart').getContext('2d');
+            costChart = new Chart(ctxCost, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Filament', 'Elektrik', 'Amortisman', 'Hata Payı (%20)'],
+                    datasets: [{
+                        data: [totalFilament, totalElectric, totalAmortisation, totalFailure],
+                        backgroundColor: ['#06b6d4', '#eab308', '#ec4899', '#f43f5e'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', boxWidth: 12, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // Grafik 2: Sipariş Bazında ROI (Bar Grafik)
+            if (roiChart) roiChart.destroy();
+            const ctxRoi = document.getElementById('roiChart').getContext('2d');
+            
+            // Son 5 siparişin verisini göster
+            const lastOrders = orders.slice(-5);
+            const labels = lastOrders.map(o => o.custName.split(' ')[0] + ' - ' + o.prodName.substring(0,8) + '...');
+            const roiData = lastOrders.map(o => o.roi);
+
+            roiChart = new Chart(ctxRoi, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'ROI %',
+                        data: roiData,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { size: 9 } } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // CSV/Excel Olarak Aktarma
+        function exportCSV() {
+            if (orders.length === 0) {
+                showToast("Dışa aktarılacak sipariş verisi bulunamadı.", "error");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Musteri Adi,Urun Adi,Baski Suresi (Saat),Gramaj (gr),Filament Fiyati (TL),Teslimat Tarihi,Elektrik Maliyeti,Amortisman Payi,Hata Payi,Toplam Maliyet,Satis Fiyati,Net Kar\n";
+
+            orders.forEach(o => {
+                const row = [
+                    `"${o.custName}"`,
+                    `"${o.prodName}"`,
+                    o.printHours,
+                    o.printWeight,
+                    o.filamentPrice,
+                    o.deliveryDate,
+                    (o.breakdown.electricCost).toFixed(2),
+                    (o.breakdown.amortisationCost).toFixed(2),
+                    (o.breakdown.failureCost).toFixed(2),
+                    o.totalCost.toFixed(2),
+                    o.salesPrice.toFixed(2),
+                    o.netProfit.toFixed(2)
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `3d_baski_siparis_raporu_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Verileriniz CSV/Excel formatında başarıyla indirildi!", "success");
+        }
+
+        // Özel Toast Bildirim Sistemi (Alert yerine)
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast-container');
+            const toastMsg = document.getElementById('toast-message');
+            const iconWrapper = document.getElementById('toast-icon-wrapper');
+
+            toastMsg.innerText = message;
+
+            if (type === "success") {
+                toast.className = "mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-950/30 text-emerald-400 flex items-center justify-between transition-all duration-300";
+                iconWrapper.className = "p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400";
+                iconWrapper.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+            } else if (type === "error") {
+                toast.className = "mb-6 p-4 rounded-xl border border-rose-500/20 bg-rose-950/30 text-rose-400 flex items-center justify-between transition-all duration-300";
+                iconWrapper.className = "p-1.5 rounded-lg bg-rose-500/10 text-rose-400";
+                iconWrapper.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            } else if (type === "warning") {
+                toast.className = "mb-6 p-4 rounded-xl border border-amber-500/20 bg-amber-950/30 text-amber-400 flex items-center justify-between transition-all duration-300";
+                iconWrapper.className = "p-1.5 rounded-lg bg-amber-500/10 text-amber-400";
+                iconWrapper.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`;
+            }
+
+            toast.classList.remove('hidden');
+
+            // 5 saniye sonra otomatik gizle
+            setTimeout(() => {
+                hideToast();
+            }, 5000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast-container').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
